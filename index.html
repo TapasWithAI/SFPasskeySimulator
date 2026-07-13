@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salesforce Passkey Onboarding — Support Engineer Training Tool</title>
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --sf-blue:       #0176d3;
+    --sf-blue-dark:  #014486;
+    --sf-blue-light: #1b96ff;
+    --sf-navy:       #032d60;
+    --sf-teal:       #06a59a;
+    --slate-50:      #f8fafc;
+    --slate-100:     #f1f5f9;
+    --slate-200:     #e2e8f0;
+    --slate-300:     #cbd5e1;
+    --slate-400:     #94a3b8;
+    --slate-500:     #64748b;
+    --slate-600:     #475569;
+    --slate-700:     #334155;
+    --slate-800:     #1e293b;
+    --slate-900:     #0f172a;
+    --green-sim:     #5dc96e;
+    --white:         #ffffff;
+    --success:       #16a34a;
+    --warn:          #d97706;
+    --radius:        12px;
+    --shadow-sm:     0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.08);
+    --shadow-md:     0 4px 16px rgba(0,0,0,.14);
+    --shadow-lg:     0 12px 40px rgba(0,0,0,.18);
+    --transition:    .25s cubic-bezier(.4,0,.2,1);
+  }
+  html { font-size: 15px; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--slate-900);
+    color: var(--slate-800);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Top App Bar ── */
+  .app-bar {
+    background: linear-gradient(135deg, var(--sf-navy) 0%, #0a3870 100%);
+    padding: 0 28px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,.4);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .app-bar__brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .app-bar__logo {
+    width: 32px; height: 32px;
+    background: var(--sf-blue);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .app-bar__logo svg { width: 20px; height: 20px; }
+  .app-bar__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: .01em;
+  }
+  .app-bar__subtitle {
+    font-size: .72rem;
+    color: #93c5fd;
+    font-weight: 400;
+  }
+  .app-bar__badge {
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: .72rem;
+    color: #bfdbfe;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  /* ── Step Progress ── */
+  .progress-bar {
+    background: var(--slate-800);
+    padding: 12px 28px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border-bottom: 1px solid var(--slate-700);
+    overflow-x: auto;
+  }
+  .step-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .step-item__dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .75rem;
+    font-weight: 700;
+    transition: var(--transition);
+    background: var(--slate-700);
+    color: var(--slate-400);
+    border: 2px solid var(--slate-600);
+    cursor: pointer;
+  }
+  .step-item__dot.active {
+    background: var(--sf-blue);
+    border-color: var(--sf-blue-light);
+    color: #fff;
+    box-shadow: 0 0 0 3px rgba(1,118,211,.25);
+  }
+  .step-item__dot.done {
+    background: var(--success);
+    border-color: #22c55e;
+    color: #fff;
+  }
+  .step-item__label {
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--slate-500);
+    white-space: nowrap;
+    transition: var(--transition);
+  }
+  .step-item__label.active { color: var(--sf-blue-light); }
+  .step-item__label.done { color: #4ade80; }
+  .step-connector {
+    width: 36px; height: 2px;
+    background: var(--slate-700);
+    margin: 0 4px;
+    flex-shrink: 0;
+    transition: var(--transition);
+  }
+  .step-connector.done { background: var(--success); }
+
+  /* ── Main Layout ── */
+  .main-layout {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* ── Simulator Panel ── */
+  .simulator-panel {
+    background: var(--slate-800);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    gap: 20px;
+    border-right: 1px solid var(--slate-700);
+  }
+  .simulator-label {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--slate-500);
+    align-self: flex-start;
+  }
+  .simulator-frame {
+    width: 100%;
+    max-width: 500px;
+    background: var(--green-sim);
+    border-radius: 18px;
+    padding: 40px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 540px;
+    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,.06);
+    position: relative;
+    transition: var(--transition);
+  }
+  /* Screen inset chrome */
+  .simulator-frame::before {
+    content: '';
+    position: absolute;
+    top: -6px; left: 50%; transform: translateX(-50%);
+    width: 60px; height: 6px;
+    background: var(--slate-700);
+    border-radius: 6px 6px 0 0;
+  }
+
+  /* ── SF Logo Chip ── */
+  .sf-logo-chip {
+    width: 86px; height: 86px;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #4a1d6e 0%, #2d1b4e 100%);
+    border: 3px solid rgba(255,255,255,.18);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.35);
+    position: relative;
+    overflow: hidden;
+  }
+  .sf-logo-chip::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 40% 35%, rgba(255,100,200,.25), transparent 60%);
+  }
+  .sf-logo-chip__ring {
+    width: 58px; height: 58px;
+    border: 3px solid rgba(255,150,220,.7);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .sf-logo-chip__text {
+    font-size: .55rem;
+    font-weight: 800;
+    color: rgba(255,200,240,.9);
+    letter-spacing: .04em;
+    text-align: center;
+    line-height: 1.3;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── SF Card ── */
+  .sf-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 32px 28px 24px;
+    width: 100%;
+    box-shadow: 0 4px 24px rgba(0,0,0,.14);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .sf-card__icon-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 6px;
+  }
+  .sf-card__icon {
+    width: 72px; height: 72px;
+    color: #3d4f6e;
+  }
+  .sf-card__body {
+    font-size: .88rem;
+    color: #1a2740;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+  .sf-card__body strong { font-weight: 600; }
+  .sf-card__actions {
+    width: 100%;
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+  }
+  .sf-btn {
+    flex: 1;
+    padding: 13px 10px;
+    border-radius: 8px;
+    font-size: .88rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    outline: none;
+  }
+  .sf-btn--gray {
+    background: #e5e7ea;
+    color: #9199a6;
+    cursor: not-allowed;
+  }
+  .sf-btn--blue {
+    background: #3d5afe;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(61,90,254,.35);
+  }
+  .sf-btn--blue:hover {
+    background: #2d4ae8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(61,90,254,.45);
+  }
+  .sf-btn--blue:active { transform: translateY(0); }
+  .sf-link {
+    width: 100%;
+    text-align: center;
+    font-size: .84rem;
+    color: #0176d3;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition);
+    margin-top: 4px;
+  }
+  .sf-link:hover { color: #014486; text-decoration: underline; }
+
+  /* Radio list */
+  .sf-radio-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .sf-radio-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 6px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background var(--transition);
+  }
+  .sf-radio-item:hover { background: #f0f5ff; }
+  .sf-radio-item input[type="radio"] {
+    width: 18px; height: 18px;
+    accent-color: #3d5afe;
+    margin-top: 2px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .sf-radio-item__label {
+    font-size: .86rem;
+    color: #1a2740;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+
+  /* ── Browser Dialog Overlay ── */
+  .dialog-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(3px);
+    animation: fadeIn .2s ease;
+    z-index: 20;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+  .browser-dialog {
+    background: #fff;
+    border-radius: 20px;
+    padding: 28px 24px 22px;
+    width: 100%;
+    max-width: 370px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.35), 0 0 0 1px rgba(0,0,0,.06);
+    animation: slideUp .25s cubic-bezier(.4,0,.2,1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .bd-hero {
+    width: 110px; height: 90px;
+    background: linear-gradient(145deg, #e8f0fe 0%, #c7d7f8 100%);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .bd-hero::before, .bd-hero::after {
+    content: '';
+    position: absolute;
+    width: 8px; height: 8px;
+    background: rgba(1,118,211,.25);
+    border-radius: 50%;
+  }
+  .bd-hero::before { top: 12px; left: 6px; }
+  .bd-hero::after { bottom: 14px; right: 8px; width: 5px; height: 5px; }
+  .bd-dots-left, .bd-dots-right {
+    position: absolute;
+    display: flex; gap: 3px;
+  }
+  .bd-dots-left { left: 0; top: 38px; }
+  .bd-dots-right { right: -4px; top: 38px; }
+  .bd-dot {
+    width: 5px; height: 5px;
+    background: rgba(1,118,211,.2);
+    border-radius: 50%;
+  }
+  .bd-dot:first-child { width: 8px; }
+  .bd-hero-icon { position: relative; z-index: 1; }
+
+  .bd-title {
+    font-size: .95rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    text-align: center;
+    margin-bottom: 16px;
+    line-height: 1.35;
+  }
+  .bd-divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #83c5f7, transparent);
+    margin: 0 0 14px;
+  }
+  .bd-user-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 4px 0;
+  }
+  .bd-user-row span {
+    font-size: .84rem;
+    color: #3a3a5c;
+    font-weight: 500;
+  }
+  .bd-body-text {
+    font-size: .82rem;
+    color: #6b7280;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  .bd-actions {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .bd-btn {
+    padding: 9px 16px;
+    border-radius: 50px;
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: var(--transition);
+    outline: none;
+    white-space: nowrap;
+  }
+  .bd-btn--ghost {
+    background: transparent;
+    color: #0176d3;
+    border: 1.5px solid transparent;
+  }
+  .bd-btn--ghost:hover { border-color: #0176d3; background: #eff6ff; }
+  .bd-btn--cancel {
+    background: #d4f5f3;
+    color: #0e7490;
+  }
+  .bd-btn--cancel:hover { background: #a5f3eb; }
+  .bd-btn--continue {
+    background: #0d5c52;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(13,92,82,.3);
+  }
+  .bd-btn--continue:hover { background: #0a4940; transform: translateY(-1px); }
+
+  /* Save-another-way list */
+  .bd-save-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 18px;
+  }
+  .bd-save-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 6px;
+    border-bottom: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: background var(--transition);
+    border-radius: 8px;
+  }
+  .bd-save-item:hover { background: #f0fafa; }
+  .bd-save-item__icon {
+    width: 34px; height: 34px;
+    background: #f3f4f6;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .bd-save-item__label {
+    flex: 1;
+    font-size: .88rem;
+    font-weight: 600;
+    color: #1a1a2e;
+  }
+  .bd-save-item__chevron { color: #9ca3af; }
+  .bd-cancel-row {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  /* ── State label tag ── */
+  .state-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--slate-700);
+    border: 1px solid var(--slate-600);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--slate-300);
+    align-self: flex-start;
+  }
+  .state-tag__dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--sf-blue-light);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .4; }
+  }
+
+  /* ── Right Panel ── */
+  .context-panel {
+    background: var(--slate-50);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    border-left: 1px solid var(--slate-200);
+  }
+  .cp-header {
+    padding: 20px 22px 14px;
+    background: var(--white);
+    border-bottom: 1px solid var(--slate-200);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  .cp-header__title {
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 2px;
+  }
+  .cp-header__sub {
+    font-size: .72rem;
+    color: var(--slate-500);
+  }
+  .cp-body { padding: 18px 18px 28px; display: flex; flex-direction: column; gap: 18px; }
+
+  /* Context cards */
+  .ctx-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--slate-200);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .ctx-card__head {
+    padding: 12px 16px;
+    background: linear-gradient(135deg, var(--sf-navy) 0%, #0a3870 100%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ctx-card__head--teal {
+    background: linear-gradient(135deg, #0d5c52 0%, #0a4940 100%);
+  }
+  .ctx-card__head--amber {
+    background: linear-gradient(135deg, #92400e 0%, #78350f 100%);
+  }
+  .ctx-card__head--purple {
+    background: linear-gradient(135deg, #4c1d95 0%, #3b0764 100%);
+  }
+  .ctx-card__head-title {
+    font-size: .78rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+  }
+  .ctx-card__body { padding: 14px 16px; }
+
+  /* Info message */
+  .ctx-info {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: .8rem;
+    color: #1e40af;
+    line-height: 1.5;
+  }
+  .ctx-info--green {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #14532d;
+  }
+  .ctx-info--amber {
+    background: #fffbeb;
+    border-color: #fde68a;
+    color: #78350f;
+  }
+
+  /* ── Comparison Matrix ── */
+  .compare-matrix {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .compare-col {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--slate-200);
+  }
+  .compare-col__head {
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: .77rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .compare-col__head--icloud { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+  .compare-col__head--chrome { background: linear-gradient(135deg, #64748b, #334155); }
+  .compare-col__body { padding: 10px 12px; background: #fff; }
+  .compare-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .compare-row:last-child { border-bottom: none; }
+  .compare-row__key {
+    font-size: .68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--slate-400);
+  }
+  .compare-row__val {
+    font-size: .77rem;
+    color: var(--slate-700);
+    line-height: 1.4;
+  }
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+  }
+  .pill--green { background: #dcfce7; color: #15803d; }
+  .pill--amber { background: #fef3c7; color: #b45309; }
+  .pill--red   { background: #fee2e2; color: #b91c1c; }
+  .pill--blue  { background: #dbeafe; color: #1e40af; }
+
+  /* Score bar */
+  .score-bar { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+  .score-bar__track {
+    flex: 1; height: 6px;
+    background: #e2e8f0;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .score-bar__fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width .5s ease;
+  }
+  .score-bar__fill--icloud { background: linear-gradient(90deg, #3b82f6, #1d4ed8); }
+  .score-bar__fill--chrome { background: linear-gradient(90deg, #64748b, #334155); }
+  .score-bar__label { font-size: .7rem; font-weight: 700; color: var(--slate-500); }
+
+  /* ── Triage Tool ── */
+  .triage-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .triage-section__label {
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--slate-400);
+    margin-bottom: 6px;
+  }
+  .triage-btn-group { display: flex; gap: 5px; flex-wrap: wrap; }
+  .triage-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: .78rem;
+    font-weight: 600;
+    border: 1.5px solid var(--slate-200);
+    background: var(--white);
+    color: var(--slate-600);
+    cursor: pointer;
+    transition: var(--transition);
+    outline: none;
+  }
+  .triage-btn:hover { border-color: var(--sf-blue); color: var(--sf-blue); background: #eff6ff; }
+  .triage-btn.selected {
+    background: var(--sf-blue);
+    border-color: var(--sf-blue);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(1,118,211,.3);
+  }
+  .triage-result {
+    border-radius: 10px;
+    border: 1.5px solid #bfdbfe;
+    background: #eff6ff;
+    padding: 12px 14px;
+    font-size: .8rem;
+    color: #1e3a8a;
+    line-height: 1.55;
+    display: none;
+  }
+  .triage-result.visible { display: block; animation: fadeIn .2s ease; }
+  .triage-result__title {
+    font-weight: 700;
+    font-size: .82rem;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .triage-result--warn {
+    border-color: #fde68a;
+    background: #fffbeb;
+    color: #78350f;
+  }
+  .triage-result--success {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+    color: #14532d;
+  }
+
+  /* ── Script Copy Block ── */
+  .script-block {
+    border-radius: 10px;
+    border: 1px solid var(--slate-200);
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .script-block__head {
+    padding: 9px 14px;
+    background: var(--slate-100);
+    border-bottom: 1px solid var(--slate-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .script-block__title {
+    font-size: .74rem;
+    font-weight: 700;
+    color: var(--slate-600);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+  .copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--sf-blue);
+    color: #fff;
+    font-size: .7rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    outline: none;
+  }
+  .copy-btn:hover { background: var(--sf-blue-dark); }
+  .copy-btn.copied { background: var(--success); }
+  .script-block__text {
+    padding: 12px 14px;
+    font-size: .77rem;
+    color: var(--slate-700);
+    line-height: 1.6;
+    background: #fff;
+    font-family: inherit;
+    white-space: pre-wrap;
+  }
+
+  /* ── Separator ── */
+  .section-sep {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 2px 0;
+  }
+  .section-sep__line { flex: 1; height: 1px; background: var(--slate-200); }
+  .section-sep__text {
+    font-size: .68rem;
+    font-weight: 700;
+    color: var(--slate-400);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+  }
+
+  /* ── Context states ── */
+  [data-ctx] { display: none; }
+  [data-ctx].ctx-visible { display: flex; flex-direction: column; gap: 14px; }
+
+  /* Nav hint at bottom of simulator */
+  .nav-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .72rem;
+    color: var(--slate-500);
+    background: var(--slate-700);
+    border-radius: 8px;
+    padding: 8px 14px;
+    width: 100%;
+    max-width: 500px;
+    border: 1px solid var(--slate-600);
+  }
+  .nav-hint svg { flex-shrink: 0; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .main-layout { grid-template-columns: 1fr; grid-template-rows: auto auto; }
+    .context-panel { border-left: none; border-top: 1px solid var(--slate-200); max-height: 60vh; }
+  }
+  @media (max-width: 520px) {
+    .simulator-panel, .cp-body { padding: 16px; }
+    .simulator-frame { padding: 28px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ APP BAR ═══════════════════════ -->
+<header class="app-bar">
+  <div class="app-bar__brand">
+    <div class="app-bar__logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+        <circle cx="12" cy="9" r="2.5"/>
+      </svg>
+    </div>
+    <div>
+      <div class="app-bar__title">Passkey Onboarding Trainer</div>
+      <div class="app-bar__subtitle">Salesforce Support Engineering — Interactive Simulation</div>
+    </div>
+  </div>
+  <span class="app-bar__badge">Internal Tool v2.4</span>
+</header>
+
+<!-- ═══════════════════════ STEP PROGRESS ═══════════════════════ -->
+<div class="progress-bar" id="progressBar">
+  <div class="step-item">
+    <div class="step-item__dot active" id="dot1" onclick="goToState(1)">1</div>
+    <span class="step-item__label active" id="lbl1">Register Passkey</span>
+  </div>
+  <div class="step-connector" id="conn1"></div>
+  <div class="step-item">
+    <div class="step-item__dot" id="dot2" onclick="goToState(2)">2</div>
+    <span class="step-item__label" id="lbl2">Choose Method</span>
+  </div>
+  <div class="step-connector" id="conn2"></div>
+  <div class="step-item">
+    <div class="step-item__dot" id="dot3" onclick="goToState(3)">3</div>
+    <span class="step-item__label" id="lbl3">Browser Dialog</span>
+  </div>
+  <div class="step-connector" id="conn3"></div>
+  <div class="step-item">
+    <div class="step-item__dot" id="dot4" onclick="goToState(4)">4</div>
+    <span class="step-item__label" id="lbl4">Save Location</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════ MAIN LAYOUT ═══════════════════════ -->
+<div class="main-layout">
+
+  <!-- ════════ LEFT: Simulator ════════ -->
+  <section class="simulator-panel">
+
+    <div class="simulator-label">Interactive Simulation Frame — Click elements to advance states</div>
+
+    <div class="state-tag">
+      <div class="state-tag__dot"></div>
+      <span id="stateTagText">State 1 of 4 — Register a Passkey</span>
+    </div>
+
+    <!-- ── SIMULATOR FRAME ── -->
+    <div class="simulator-frame" id="simFrame">
+
+      <!-- Logo always visible -->
+      <div class="sf-logo-chip">
+        <div class="sf-logo-chip__ring">
+          <div class="sf-logo-chip__text">Demo<br>Org-1</div>
+        </div>
+      </div>
+
+      <!-- ── STATE 1: Register Passkey ── -->
+      <div id="state1" style="width:100%; display:flex; flex-direction:column; align-items:center; gap:0;">
+        <div class="sf-card">
+          <div class="sf-card__icon-wrap">
+            <!-- Fingerprint/touch icon -->
+            <svg class="sf-card__icon" viewBox="0 0 72 72" fill="none">
+              <path d="M36 14C25.5 14 17 22.5 17 33c0 6.5 3.4 12.8 9 16.5" stroke="#3d4f6e" stroke-width="3.5" stroke-linecap="round"/>
+              <path d="M36 14c10.5 0 19 8.5 19 19 0 8-4.7 15.3-12 18.7" stroke="#3d4f6e" stroke-width="3.5" stroke-linecap="round"/>
+              <path d="M36 24c-4.9 0-9 4.1-9 9 0 4 2.6 7.6 6.4 8.8" stroke="#3d4f6e" stroke-width="3" stroke-linecap="round"/>
+              <path d="M36 24c4.9 0 9 4.1 9 9 0 3.7-2.2 7-5.5 8.5" stroke="#3d4f6e" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="36" cy="33" r="3" fill="#3d4f6e"/>
+              <!-- hand shape hint -->
+              <path d="M26 48c0 4 3 8 6 10l4 4" stroke="#3d4f6e" stroke-width="3" stroke-linecap="round"/>
+              <path d="M46 48c0 4-3 8-6 10" stroke="#3d4f6e" stroke-width="3" stroke-linecap="round"/>
+              <rect x="28" y="56" width="16" height="8" rx="4" fill="#3d4f6e"/>
+            </svg>
+          </div>
+          <div class="sf-card__body">
+            For fast, phishing-resistant login, set up a passkey. Use passkeys to log in with methods such as Touch ID, Face ID, or security keys.<br><br>
+            <strong>Click Register, then use your built-in authenticator.</strong>
+          </div>
+          <div class="sf-card__actions">
+            <button class="sf-btn sf-btn--gray" disabled>Back</button>
+            <button class="sf-btn sf-btn--blue" onclick="goToState(3)">Register Passkey</button>
+          </div>
+          <a class="sf-link" onclick="goToState(2)">Choose Another Verification Method</a>
+        </div>
+      </div>
+
+      <!-- ── STATE 2: Choose Method ── -->
+      <div id="state2" style="width:100%; display:none;">
+        <div class="sf-card">
+          <div class="sf-card__body">
+            <strong style="display:block; margin-bottom:8px; font-size:.92rem; color:#1a2740;">To keep your account secure, Salesforce requires extra verification. Set up multi-factor authentication (MFA) to finish logging in.</strong>
+          </div>
+          <div class="sf-radio-list">
+            <label class="sf-radio-item">
+              <input type="radio" name="mfaMethod" value="builtin">
+              <span class="sf-radio-item__label">Use a built-in authenticator on your device</span>
+            </label>
+            <label class="sf-radio-item">
+              <input type="radio" name="mfaMethod" value="sfapp">
+              <span class="sf-radio-item__label">Use the Salesforce Authenticator mobile app</span>
+            </label>
+            <label class="sf-radio-item">
+              <input type="radio" name="mfaMethod" value="totp">
+              <span class="sf-radio-item__label">Use verification codes from an authenticator app (such as Google Authenticator or Authy)</span>
+            </label>
+          </div>
+          <div class="sf-card__actions">
+            <button class="sf-btn sf-btn--blue" style="flex:1;" onclick="goToState(1)">Continue</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── STATE 3 / STATE 4: Browser Dialog (overlay) ── -->
+      <div id="dialogOverlay" class="dialog-overlay" style="display:none;">
+
+        <!-- STATE 3: Create Passkey -->
+        <div class="browser-dialog" id="bd3">
+          <div class="bd-hero" style="position:relative;">
+            <div class="bd-dots-left"><div class="bd-dot"></div><div class="bd-dot"></div><div class="bd-dot"></div><div class="bd-dot"></div></div>
+            <div class="bd-dots-right"><div class="bd-dot"></div><div class="bd-dot"></div><div class="bd-dot"></div><div class="bd-dot"></div></div>
+            <svg class="bd-hero-icon" width="62" height="62" viewBox="0 0 62 62" fill="none">
+              <!-- fingerprint bg blob -->
+              <circle cx="31" cy="31" r="30" fill="url(#bdGrad)"/>
+              <defs>
+                <radialGradient id="bdGrad" cx="35%" cy="30%">
+                  <stop offset="0%" stop-color="#dbeafe"/>
+                  <stop offset="100%" stop-color="#93c5fd"/>
+                </radialGradient>
+              </defs>
+              <!-- person icon -->
+              <circle cx="27" cy="22" r="6" fill="#1d4ed8"/>
+              <path d="M14 42c0-7 6-11 13-11h1c7 0 13 4 13 11" fill="#1d4ed8"/>
+              <!-- key icon on person -->
+              <circle cx="38" cy="38" r="8" fill="#fff" stroke="#1d4ed8" stroke-width="2.5"/>
+              <circle cx="38" cy="38" r="4" fill="#1d4ed8"/>
+              <rect x="44" y="36.5" width="10" height="3" rx="1.5" fill="#1d4ed8"/>
+              <rect x="51" y="36.5" width="3" height="6" rx="1.5" fill="#1d4ed8"/>
+              <!-- fingerprint lines top-right -->
+              <path d="M46 14c3 3 5 7 5 11" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M49 11c4 4 7 10 7 15" stroke="#93c5fd" stroke-width="2" stroke-linecap="round"/>
+              <path d="M43 17c2 2 3 5 3 8" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="bd-title">Create a passkey for<br>tapas-demo.my.salesforce.com</div>
+          <div class="bd-divider"></div>
+          <div class="bd-user-row">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="8" r="4" fill="#6b7280"/>
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="#6b7280"/>
+              <circle cx="19" cy="17" r="4" fill="#3b82f6"/>
+              <path d="M17.5 17l1 1 2-2" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>tkb@sdo2022.salesforce</span>
+          </div>
+          <div class="bd-divider" style="margin:0 0 10px;"></div>
+          <div class="bd-body-text">This passkey will only be saved on this device</div>
+          <div class="bd-actions">
+            <button class="bd-btn bd-btn--ghost" onclick="goToState(4)">Save another way</button>
+            <button class="bd-btn bd-btn--cancel" onclick="goToState(1)">Cancel</button>
+            <button class="bd-btn bd-btn--continue" onclick="showSuccess()">Continue</button>
+          </div>
+        </div>
+
+        <!-- STATE 4: Save Another Way -->
+        <div class="browser-dialog" id="bd4" style="display:none;">
+          <div class="bd-hero" style="position:relative; margin-bottom:16px;">
+            <div class="bd-dots-left"><div class="bd-dot"></div><div class="bd-dot"></div><div class="bd-dot"></div><div class="bd-dot"></div></div>
+            <div class="bd-dots-right"><div class="bd-dot"></div><div class="bd-dot"></div><div class="bd-dot"></div><div class="bd-dot"></div></div>
+            <svg class="bd-hero-icon" width="62" height="62" viewBox="0 0 62 62" fill="none">
+              <circle cx="31" cy="31" r="30" fill="url(#bdGrad2)"/>
+              <defs>
+                <radialGradient id="bdGrad2" cx="35%" cy="30%">
+                  <stop offset="0%" stop-color="#dbeafe"/>
+                  <stop offset="100%" stop-color="#93c5fd"/>
+                </radialGradient>
+              </defs>
+              <circle cx="27" cy="22" r="6" fill="#1d4ed8"/>
+              <path d="M14 42c0-7 6-11 13-11h1c7 0 13 4 13 11" fill="#1d4ed8"/>
+              <circle cx="38" cy="38" r="8" fill="#fff" stroke="#1d4ed8" stroke-width="2.5"/>
+              <circle cx="38" cy="38" r="4" fill="#1d4ed8"/>
+              <rect x="44" y="36.5" width="10" height="3" rx="1.5" fill="#1d4ed8"/>
+              <rect x="51" y="36.5" width="3" height="6" rx="1.5" fill="#1d4ed8"/>
+              <path d="M46 14c3 3 5 7 5 11" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M43 17c2 2 3 5 3 8" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="bd-title" style="font-size:.88rem;">Choose where to save your passkey for<br><strong>tapas-demo.my.salesforce.com</strong></div>
+          <div class="bd-divider" style="margin: 14px 0 10px;"></div>
+          <div class="bd-save-list">
+            <div class="bd-save-item" onclick="selectStorage('icloud')">
+              <div class="bd-save-item__icon">
+                <!-- cloud icon -->
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M18 10a6 6 0 00-11.9-1A4 4 0 004 17h14a4 4 0 000-8" fill="#64748b"/>
+                  <rect x="9" y="17" width="6" height="4" rx="1" fill="#94a3b8"/>
+                  <path d="M10.5 19h3M12 17v4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <span class="bd-save-item__label">iCloud Keychain</span>
+              <svg class="bd-save-item__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </div>
+            <div class="bd-save-item" onclick="selectStorage('chrome')">
+              <div class="bd-save-item__icon">
+                <!-- laptop icon -->
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="5" width="18" height="12" rx="2" fill="#64748b"/>
+                  <rect x="5" y="7" width="14" height="8" fill="#94a3b8"/>
+                  <rect x="1" y="17" width="22" height="2" rx="1" fill="#64748b"/>
+                </svg>
+              </div>
+              <span class="bd-save-item__label">Your Chrome profile</span>
+              <svg class="bd-save-item__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </div>
+          </div>
+          <div class="bd-cancel-row">
+            <button class="bd-btn bd-btn--cancel" onclick="goToState(3)">Cancel</button>
+          </div>
+        </div>
+
+      </div><!-- /dialogOverlay -->
+
+    </div><!-- /simFrame -->
+
+    <!-- Nav hint -->
+    <div class="nav-hint">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+      </svg>
+      <span>Click interactive elements in the frame above, or use the step numbers to jump to any state.</span>
+    </div>
+
+  </section>
+
+  <!-- ════════ RIGHT: Context Panel ════════ -->
+  <aside class="context-panel">
+    <div class="cp-header">
+      <div class="cp-header__title">Support Context Engine</div>
+      <div class="cp-header__sub" id="cpSubtitle">Dynamically updates as you navigate the simulation</div>
+    </div>
+    <div class="cp-body" id="cpBody">
+
+      <!-- ── CTX 1: Register Passkey state ── -->
+      <div data-ctx="1" id="ctx1">
+        <div class="ctx-card">
+          <div class="ctx-card__head">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            <span class="ctx-card__head-title">State 1 — What the Customer Sees</span>
+          </div>
+          <div class="ctx-card__body">
+            <div class="ctx-info">
+              The customer has been prompted by Salesforce to register a passkey (likely first-login MFA enforcement). They are on the native Salesforce passkey registration page at their custom domain.
+            </div>
+          </div>
+        </div>
+
+        <div class="ctx-card">
+          <div class="ctx-card__head ctx-card__head--teal">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M9 12l2 2 4-4M22 12c0 5.5-4.5 10-10 10S2 17.5 2 12 6.5 2 12 2s10 4.5 10 10z"/></svg>
+            <span class="ctx-card__head-title">Engineer Talking Points</span>
+          </div>
+          <div class="ctx-card__body" style="display:flex; flex-direction:column; gap:10px;">
+            <div class="ctx-info ctx-info--green">
+              <strong>✓ Passkeys are phishing-resistant</strong> — Unlike SMS OTP or TOTP codes, passkeys use public-key cryptography. The private key never leaves the device. Reassure customers this is more secure than their old method.
+            </div>
+            <div class="ctx-info">
+              <strong>Two paths from this screen:</strong><br>
+              1. <strong>Register Passkey</strong> — Triggers the browser's native WebAuthn dialog (State 3)<br>
+              2. <strong>Choose Another Method</strong> — Opens the MFA selector (State 2)
+            </div>
+          </div>
+        </div>
+
+        <div class="script-block">
+          <div class="script-block__head">
+            <span class="script-block__title">Quick Script — Passkey Registration</span>
+            <button class="copy-btn" onclick="copyScript(this, 'script1')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <pre class="script-block__text" id="script1">Hi [Customer Name],
+
+I can see you're on the Salesforce passkey registration page. Let's get this set up for you.
+
+You'll see a page with "Register a Passkey" at the top. Click the blue "Register Passkey" button, and your browser/device will pop up a dialog asking you to verify your identity — this might be Face ID, Touch ID, or a PIN depending on your device.
+
+If you'd prefer a different method (like an authenticator app), click "Choose Another Verification Method" at the bottom instead.
+
+Let me know which option you'd like to proceed with!</pre>
+        </div>
+      </div>
+
+      <!-- ── CTX 2: Choose Method state ── -->
+      <div data-ctx="2" id="ctx2">
+        <div class="ctx-card">
+          <div class="ctx-card__head ctx-card__head--purple">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <span class="ctx-card__head-title">State 2 — MFA Method Selection</span>
+          </div>
+          <div class="ctx-card__body">
+            <div class="ctx-info">
+              The customer chose to not use a passkey. They are now selecting an alternative MFA method. Guide them to the appropriate option based on their device and preference.
+            </div>
+          </div>
+        </div>
+
+        <div class="ctx-card">
+          <div class="ctx-card__head ctx-card__head--teal">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 10h16M4 14h10"/></svg>
+            <span class="ctx-card__head-title">Option Guidance Matrix</span>
+          </div>
+          <div class="ctx-card__body" style="display:flex; flex-direction:column; gap:8px;">
+            <div class="ctx-info ctx-info--green">
+              <strong>Option 1 — Built-in authenticator:</strong> Best for customers who want the passkey experience but clicked the wrong button. Redirects back to the WebAuthn passkey flow.
+            </div>
+            <div class="ctx-info">
+              <strong>Option 2 — Salesforce Authenticator App:</strong> Best for mobile-first users who are already using the SF ecosystem. Requires app install on iOS/Android.
+            </div>
+            <div class="ctx-info ctx-info--amber">
+              <strong>Option 3 — TOTP (Google Auth / Authy):</strong> Use for customers on locked-down devices who cannot install SF Authenticator, or who already have a TOTP manager set up.
+            </div>
+          </div>
+        </div>
+
+        <div class="script-block">
+          <div class="script-block__head">
+            <span class="script-block__title">Script — Method Selector</span>
+            <button class="copy-btn" onclick="copyScript(this, 'script2')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <pre class="script-block__text" id="script2">Hi [Customer Name],
+
+You should now see a "Choose a Verification Method" screen with three options.
+
+Quick guide:
+• If you want the easiest option: select "Built-in authenticator" — this uses Face ID, Touch ID, or Windows Hello on your device.
+• If you have a smartphone and want push notifications: select "Salesforce Authenticator app" and download it from the App Store or Google Play.
+• If you already use Google Authenticator or Authy: select the third option and scan the QR code when prompted.
+
+Which option sounds best for your setup?</pre>
+        </div>
+      </div>
+
+      <!-- ── CTX 3: Browser Dialog state ── -->
+      <div data-ctx="3" id="ctx3">
+        <div class="ctx-card">
+          <div class="ctx-card__head">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <span class="ctx-card__head-title">State 3 — WebAuthn Browser Dialog</span>
+          </div>
+          <div class="ctx-card__body">
+            <div class="ctx-info">
+              This is the <strong>native browser dialog</strong> — it is NOT a Salesforce UI. It is controlled by the OS/browser. Customers may be confused because it looks different from Salesforce branding. This is expected and secure behavior.
+            </div>
+          </div>
+        </div>
+
+        <div class="ctx-card">
+          <div class="ctx-card__head ctx-card__head--amber">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span class="ctx-card__head-title">Common Issues at This Step</span>
+          </div>
+          <div class="ctx-card__body" style="display:flex; flex-direction:column; gap:8px;">
+            <div class="ctx-info ctx-info--amber">
+              <strong>Dialog doesn't appear:</strong> Browser may be blocking popups or WebAuthn is disabled. Check browser flags — Chrome: chrome://flags, ensure "WebAuthentication" is not disabled.
+            </div>
+            <div class="ctx-info ctx-info--amber">
+              <strong>Biometric prompt fails:</strong> Customer may need to set up Windows Hello / Face ID at the OS level first before the browser can use it.
+            </div>
+            <div class="ctx-info">
+              <strong>"Save another way"</strong> button lets customers choose where to store the passkey. Clicking it goes to State 4.
+            </div>
+          </div>
+        </div>
+
+        <div class="script-block">
+          <div class="script-block__head">
+            <span class="script-block__title">Script — WebAuthn Dialog</span>
+            <button class="copy-btn" onclick="copyScript(this, 'script3')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <pre class="script-block__text" id="script3">Hi [Customer Name],
+
+After clicking "Register Passkey," you should see a pop-up dialog from your browser (not Salesforce) titled "Create a passkey for tapas-demo.my.salesforce.com."
+
+This is completely expected — it's your browser securely creating the passkey. You'll see your email address shown to confirm it's the right account.
+
+Simply click "Continue" and follow the biometric prompt (Face ID, Touch ID, fingerprint, or PIN).
+
+If you want to save the passkey to iCloud or Chrome instead of this device, click "Save another way" first.
+
+Is the dialog visible on your screen?</pre>
+        </div>
+      </div>
+
+      <!-- ── CTX 4: Save Another Way ── -->
+      <div data-ctx="4" id="ctx4">
+
+        <!-- Comparison Matrix -->
+        <div class="ctx-card">
+          <div class="ctx-card__head">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            <span class="ctx-card__head-title">Storage Option Comparison Matrix</span>
+          </div>
+          <div class="ctx-card__body">
+            <div class="compare-matrix">
+              <div class="compare-col">
+                <div class="compare-col__head compare-col__head--icloud">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M18 10a6 6 0 00-11.9-1A4 4 0 004 17h14a4 4 0 000-8"/></svg>
+                  iCloud Keychain
+                </div>
+                <div class="compare-col__body">
+                  <div class="compare-row">
+                    <span class="compare-row__key">Platform</span>
+                    <span class="compare-row__val"><span class="pill pill--blue">Apple Only</span></span>
+                  </div>
+                  <div class="compare-row">
+                    <span class="compare-row__key">Sync</span>
+                    <span class="compare-row__val"><span class="pill pill--green">All Apple Devices</span></span>
+                  </div>
+                  <div class="compare-row">
+                    <span class="compare-row__key">Windows</span>
+                    <span class="compare-row__val"><span class="pill pill--red">Not Available</span></span>
+                  </div>
+                  <div class="compare-row">
+                    <span class="compare-row__key">Backup</span>
+                    <span class="compare-row__val"><span class="pill pill--green">iCloud Encrypted</span></span>
+                  </div>
+                  <div class="compare-row">
+                    <span class="compare-row__key">Security</span>
+                    <span class="compare-row__val"><span class="pill pill--green">Hardware-backed</span></span>
+                  </div>
+                  <div class="compare-row">
+                    <span class="compare-row__key">Portability</span>
+                    <div class="score-bar">
+                      <div class="score-bar__track"><div class="score-bar__fill score-bar__fill--icloud" style="width:85%"></div></div>
+                      <span class="score-bar__label">85%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="compare-col">
+                <div class="compare-col__head compare-col__head--chrome">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+                  Chrome Profile
+                </div>
+                <div class="compare-col__body">
+                  <div class="compare-row">
+                    <span class="compare-row__key">Platform</span>
+                    <span class="compare-row__val"><span class="pill pill--green">Cross-platform</span></span>
+                  </div>
+                  <div class="compare-row">
+                    <span class="compare-row__key">Sync</span>
+                    <span class="compare-row__val"><span class="pill pill--green">Chrome on any OS</span></span>
+                  </div>
+                  <div class="compare-row">
+                    <span class="compare-row__key">Windows</span>
+                    <span class="compare-row__val"><span class="pill pill--green">Fully Supported</span></span>
+                  </div>
+                  <div class="compare-row">
+                    <span class="compare-row__key">Backup</span>
+                    <span class="compare-row__val"><span class="pill pill--amber">Google Account</span></span>
+                  </div>
+                  <div class="compare-row">
+                    <span class="compare-row__key">Security</span>
+                    <span class="compare-row__val"><span class="pill pill--amber">Software-backed</span></span>
+                  </div>
+                  <div class="compare-row">
+                    <span class="compare-row__key">Portability</span>
+                    <div class="score-bar">
+                      <div class="score-bar__track"><div class="score-bar__fill score-bar__fill--chrome" style="width:70%"></div></div>
+                      <span class="score-bar__label">70%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Triage Tool -->
+        <div class="ctx-card">
+          <div class="ctx-card__head ctx-card__head--purple">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            <span class="ctx-card__head-title">Customer Persona Triage</span>
+          </div>
+          <div class="ctx-card__body">
+            <div class="triage-grid">
+              <div>
+                <div class="triage-section__label">OS</div>
+                <div class="triage-btn-group">
+                  <button class="triage-btn" data-group="os" data-val="mac" onclick="selectTriage(this)">Mac</button>
+                  <button class="triage-btn" data-group="os" data-val="win" onclick="selectTriage(this)">Windows</button>
+                </div>
+              </div>
+              <div>
+                <div class="triage-section__label">Browser</div>
+                <div class="triage-btn-group">
+                  <button class="triage-btn" data-group="browser" data-val="safari" onclick="selectTriage(this)">Safari</button>
+                  <button class="triage-btn" data-group="browser" data-val="chrome" onclick="selectTriage(this)">Chrome</button>
+                  <button class="triage-btn" data-group="browser" data-val="edge" onclick="selectTriage(this)">Edge</button>
+                </div>
+              </div>
+            </div>
+            <div class="triage-result" id="triageResult"></div>
+          </div>
+        </div>
+
+        <!-- Scripts for each path -->
+        <div class="section-sep"><div class="section-sep__line"></div><span class="section-sep__text">Support Scripts</span><div class="section-sep__line"></div></div>
+
+        <div class="script-block">
+          <div class="script-block__head">
+            <span class="script-block__title">Script — iCloud Keychain Path</span>
+            <button class="copy-btn" onclick="copyScript(this, 'scriptIcloud')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <pre class="script-block__text" id="scriptIcloud">Hi [Customer Name],
+
+You clicked "Save another way" and should see two options.
+
+For the best experience on your Apple device, select "iCloud Keychain." This stores your passkey securely in iCloud and syncs it to all your Apple devices (iPhone, iPad, Mac) automatically.
+
+Requirements:
+• You must be signed into iCloud on this device
+• iCloud Keychain must be enabled in Settings > [Your Name] > iCloud > Passwords & Keychain
+
+After selecting it, you'll be prompted to verify with Face ID, Touch ID, or your device passcode.
+
+Once saved, you can log into Salesforce from any Apple device using the same passkey!</pre>
+        </div>
+
+        <div class="script-block">
+          <div class="script-block__head">
+            <span class="script-block__title">Script — Chrome Profile Path</span>
+            <button class="copy-btn" onclick="copyScript(this, 'scriptChrome')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <pre class="script-block__text" id="scriptChrome">Hi [Customer Name],
+
+If you're using Chrome on Windows or prefer Chrome across devices, select "Your Chrome profile."
+
+This stores the passkey in your Google Chrome profile synced to your Google Account. You'll be able to use it on any device where you're signed into the same Chrome profile.
+
+Requirements:
+• You must be signed into Chrome with your Google Account
+• Chrome sync must be enabled for passwords/passkeys
+
+Note for Windows users: Chrome will use Windows Hello (PIN, fingerprint, or face) to verify you when creating or using the passkey.
+
+After selecting Chrome profile, follow the on-screen prompt to verify your identity. The passkey will be saved and ready to use immediately!</pre>
+        </div>
+
+      </div>
+
+    </div><!-- /cpBody -->
+  </aside>
+
+</div><!-- /main-layout -->
+
+<script>
+  // ── State management ──
+  let currentState = 1;
+  const triageState = { os: null, browser: null };
+
+  const stateNames = {
+    1: 'State 1 of 4 — Register a Passkey',
+    2: 'State 2 of 4 — Choose Verification Method',
+    3: 'State 3 of 4 — Browser WebAuthn Dialog',
+    4: 'State 4 of 4 — Save Another Way'
+  };
+
+  const cpSubtitles = {
+    1: 'Viewing: Registration entry point & talking points',
+    2: 'Viewing: MFA method selection guidance',
+    3: 'Viewing: Native browser dialog troubleshooting',
+    4: 'Viewing: Passkey storage paths & triage tool'
+  };
+
+  function goToState(n) {
+    currentState = n;
+
+    // Update state tag
+    document.getElementById('stateTagText').textContent = stateNames[n];
+    document.getElementById('cpSubtitle').textContent = cpSubtitles[n];
+
+    // Show/hide sim states
+    document.getElementById('state1').style.display = 'none';
+    document.getElementById('state2').style.display = 'none';
+    document.getElementById('dialogOverlay').style.display = 'none';
+    document.getElementById('bd3').style.display = 'none';
+    document.getElementById('bd4').style.display = 'none';
+
+    if (n === 1) {
+      document.getElementById('state1').style.display = 'flex';
+    } else if (n === 2) {
+      document.getElementById('state2').style.display = 'block';
+    } else if (n === 3) {
+      document.getElementById('dialogOverlay').style.display = 'flex';
+      document.getElementById('bd3').style.display = 'flex';
+    } else if (n === 4) {
+      document.getElementById('dialogOverlay').style.display = 'flex';
+      document.getElementById('bd4').style.display = 'flex';
+    }
+
+    // Update step indicators
+    for (let i = 1; i <= 4; i++) {
+      const dot = document.getElementById('dot' + i);
+      const lbl = document.getElementById('lbl' + i);
+      dot.className = 'step-item__dot';
+      lbl.className = 'step-item__label';
+      if (i < n) {
+        dot.classList.add('done');
+        lbl.classList.add('done');
+        dot.textContent = '✓';
+      } else if (i === n) {
+        dot.classList.add('active');
+        lbl.classList.add('active');
+        dot.textContent = i;
+      } else {
+        dot.textContent = i;
+      }
+    }
+    for (let i = 1; i <= 3; i++) {
+      const conn = document.getElementById('conn' + i);
+      conn.className = 'step-connector' + (i < n ? ' done' : '');
+    }
+
+    // Update context panel
+    document.querySelectorAll('[data-ctx]').forEach(el => el.classList.remove('ctx-visible'));
+    const ctxEl = document.getElementById('ctx' + n);
+    if (ctxEl) ctxEl.classList.add('ctx-visible');
+  }
+
+  function showSuccess() {
+    // Simulate a brief "success" then reset
+    const bd = document.getElementById('bd3');
+    bd.style.opacity = '0';
+    bd.style.transform = 'scale(1.04)';
+    bd.style.transition = 'all .3s ease';
+    setTimeout(() => {
+      goToState(1);
+      bd.style.opacity = '';
+      bd.style.transform = '';
+      bd.style.transition = '';
+      // Show a small toast
+      showToast('Passkey registered successfully! Simulation reset to State 1.');
+    }, 400);
+  }
+
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.style.cssText = `
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #16a34a; color: #fff; padding: 10px 22px; border-radius: 8px;
+      font-size: .82rem; font-weight: 600; box-shadow: 0 4px 16px rgba(0,0,0,.25);
+      z-index: 9999; animation: slideUp .25s ease;
+    `;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+
+  function selectStorage(type) {
+    const label = type === 'icloud' ? 'iCloud Keychain' : 'Chrome Profile';
+    showToast(`Customer selected: ${label}. Simulation complete — reset to State 1 in 2s.`);
+    setTimeout(() => goToState(1), 2200);
+  }
+
+  // ── Triage tool ──
+  function selectTriage(btn) {
+    const group = btn.dataset.group;
+    document.querySelectorAll(`.triage-btn[data-group="${group}"]`).forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    triageState[group] = btn.dataset.val;
+    updateTriage();
+  }
+
+  const triageRecommendations = {
+    'mac-safari': {
+      cls: 'triage-result--success',
+      title: '✓ Best Match: iCloud Keychain',
+      body: 'Safari on Mac natively supports iCloud Keychain for passkeys. The "Save another way" dialog will show iCloud Keychain as the primary option. Direct the customer to select it — no additional setup needed if they\'re signed into iCloud. Biometric auth via Touch ID or device password will be prompted.'
+    },
+    'mac-chrome': {
+      cls: '',
+      title: '⚡ Supported: Chrome Profile or iCloud',
+      body: 'Chrome on Mac shows both options. For seamless Apple ecosystem sync, recommend iCloud Keychain. If the customer uses Chrome across Windows and Mac equally, Chrome Profile is a reasonable alternative. Note: Chrome may require the customer to enter their macOS password to use hardware security.'
+    },
+    'mac-edge': {
+      cls: '',
+      title: '⚡ Edge on Mac — Limited Options',
+      body: 'Microsoft Edge on Mac may route passkey creation through Windows Hello integration (unsupported on Mac) or fall back to iCloud Keychain in newer versions. Recommend the customer use Chrome or Safari for the most reliable passkey experience on Mac.'
+    },
+    'win-safari': {
+      cls: 'triage-result--warn',
+      title: '⚠ Issue: Safari Not Available on Windows',
+      body: 'Safari is not available on Windows. If the customer is reporting they use Safari on Windows, verify their OS — they may actually be on a Mac. Direct them to use Chrome or Edge on Windows for passkey registration. iCloud Keychain is NOT available on Windows natively.'
+    },
+    'win-chrome': {
+      cls: 'triage-result--success',
+      title: '✓ Best Match: Chrome Profile (Windows)',
+      body: 'Chrome on Windows is the ideal path for Windows customers. The "Save another way" dialog will show "Your Chrome profile" and Windows Hello as the verification method. Ensure the customer has Windows Hello configured (Settings > Accounts > Sign-in options). Chrome will use Windows Hello for biometric verification.'
+    },
+    'win-edge': {
+      cls: 'triage-result--success',
+      title: '✓ Good: Windows Hello / Microsoft Authenticator',
+      body: 'Edge on Windows leverages Windows Hello natively. The browser dialog may not show iCloud options at all — only Windows Hello and potentially Microsoft Authenticator. Guide the customer to verify with their Windows PIN, fingerprint, or face. Microsoft ecosystem users will find this seamless.'
+    }
+  };
+
+  function updateTriage() {
+    const res = document.getElementById('triageResult');
+    if (!triageState.os || !triageState.browser) {
+      res.classList.remove('visible');
+      return;
+    }
+    const key = triageState.os + '-' + triageState.browser;
+    const rec = triageRecommendations[key];
+    if (!rec) { res.classList.remove('visible'); return; }
+
+    res.className = 'triage-result visible ' + (rec.cls || '');
+    res.innerHTML = `<div class="triage-result__title">${rec.title}</div>${rec.body}`;
+  }
+
+  // ── Copy script ──
+  function copyScript(btn, id) {
+    const text = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.classList.add('copied');
+      btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Copied!`;
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy`;
+      }, 2500);
+    }).catch(() => {
+      // Fallback for browsers without clipboard API permission
+      const el = document.createElement('textarea');
+      el.value = text;
+      el.style.position = 'fixed'; el.style.opacity = '0';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      el.remove();
+      btn.classList.add('copied');
+      btn.textContent = 'Copied!';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy`;
+      }, 2500);
+    });
+  }
+
+  // ── Init ──
+  goToState(1);
+</script>
+
+</body>
+</html>
