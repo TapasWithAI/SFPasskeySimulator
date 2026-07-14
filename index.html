@@ -177,17 +177,18 @@
   }
   .simulator-frame {
     width: 100%;
-    max-width: 500px;
-    background: var(--green-sim);
+    max-width: 420px;
+    background: #f2f4f8;
     border-radius: 18px;
-    padding: 40px 28px;
+    padding: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 540px;
+    min-height: 600px;
     box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,.06);
     position: relative;
     transition: var(--transition);
+    overflow: hidden;
   }
   /* Screen inset chrome */
   .simulator-frame::before {
@@ -199,102 +200,129 @@
     border-radius: 6px 6px 0 0;
   }
 
-  /* ── SF Logo Chip ── */
-  .sf-logo-chip {
-    width: 86px; height: 86px;
-    border-radius: 14px;
-    background: linear-gradient(145deg, #4a1d6e 0%, #2d1b4e 100%);
-    border: 3px solid rgba(255,255,255,.18);
-    display: flex; align-items: center; justify-content: center;
+  /* ── SF Page (full-screen states inside frame) ── */
+  .sf-page {
+    width: 100%;
+    min-height: 600px;
+    background: #f2f4f8;
+    display: flex;
     flex-direction: column;
-    margin-bottom: 18px;
-    box-shadow: 0 4px 14px rgba(0,0,0,.35);
-    position: relative;
-    overflow: hidden;
+    align-items: center;
+    padding: 32px 24px 28px;
+    gap: 0;
   }
-  .sf-logo-chip::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: radial-gradient(circle at 40% 35%, rgba(255,100,200,.25), transparent 60%);
+  .sf-page__cloud {
+    margin-bottom: 10px;
   }
-  .sf-logo-chip__ring {
-    width: 58px; height: 58px;
-    border: 3px solid rgba(255,150,220,.7);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    position: relative;
-  }
-  .sf-logo-chip__text {
-    font-size: .55rem;
-    font-weight: 800;
-    color: rgba(255,200,240,.9);
-    letter-spacing: .04em;
+  .sf-page__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #032d60;
+    margin-bottom: 16px;
     text-align: center;
-    line-height: 1.3;
-    position: relative;
-    z-index: 1;
+  }
+  .sf-page__subtitle {
+    font-size: .82rem;
+    color: #444;
+    text-align: center;
+    margin-bottom: 18px;
+    line-height: 1.5;
   }
 
-  /* ── SF Card ── */
-  .sf-card {
+  /* ── Passkey icon grid ── */
+  .sf-icon-grid {
+    display: grid;
+    grid-template-columns: 48px 88px 48px;
+    grid-template-rows: 48px 88px 48px;
+    gap: 8px;
+    align-items: center;
+    justify-items: center;
+    margin-bottom: 20px;
+  }
+  .sf-icon-grid__cell {
+    width: 44px; height: 44px;
     background: #fff;
-    border-radius: 14px;
-    padding: 32px 28px 24px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,.1);
+  }
+  .sf-icon-grid__cell--center {
+    width: 88px; height: 88px;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.14);
+    background: #fff;
+  }
+  .sf-icon-grid__cell--empty { background: transparent; box-shadow: none; }
+
+  /* ── Info banner ── */
+  .sf-info-banner {
     width: 100%;
-    box-shadow: 0 4px 24px rgba(0,0,0,.14);
+    background: #f0f4ff;
+    border: 1px solid #c7d6f7;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: .8rem;
+    color: #1a3a6e;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 14px;
+  }
+
+  /* ── Feature bullets ── */
+  .sf-features {
+    width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-  .sf-card__icon-wrap {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin-bottom: 6px;
-  }
-  .sf-card__icon {
-    width: 72px; height: 72px;
-    color: #3d4f6e;
-  }
-  .sf-card__body {
-    font-size: .88rem;
-    color: #1a2740;
-    line-height: 1.6;
-    font-weight: 400;
-  }
-  .sf-card__body strong { font-weight: 600; }
-  .sf-card__actions {
-    width: 100%;
-    display: flex;
     gap: 12px;
-    margin-top: 4px;
+    margin-bottom: 22px;
   }
+  .sf-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .sf-feature__icon {
+    width: 28px; height: 28px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sf-feature__text strong {
+    display: block;
+    font-size: .86rem;
+    font-weight: 700;
+    color: #1a2740;
+  }
+  .sf-feature__text span {
+    font-size: .8rem;
+    color: #4a5568;
+  }
+
+  /* ── SF Buttons ── */
   .sf-btn {
-    flex: 1;
-    padding: 13px 10px;
-    border-radius: 8px;
-    font-size: .88rem;
+    width: 100%;
+    padding: 14px 10px;
+    border-radius: 6px;
+    font-size: .92rem;
     font-weight: 600;
     border: none;
     cursor: pointer;
     transition: var(--transition);
     outline: none;
-  }
-  .sf-btn--gray {
-    background: #e5e7ea;
-    color: #9199a6;
-    cursor: not-allowed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
   .sf-btn--blue {
-    background: #3d5afe;
+    background: #0176d3;
     color: #fff;
-    box-shadow: 0 2px 8px rgba(61,90,254,.35);
+    box-shadow: 0 2px 8px rgba(1,118,211,.3);
   }
   .sf-btn--blue:hover {
-    background: #2d4ae8;
+    background: #014486;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(61,90,254,.45);
+    box-shadow: 0 4px 12px rgba(1,118,211,.4);
   }
   .sf-btn--blue:active { transform: translateY(0); }
   .sf-link {
@@ -307,38 +335,99 @@
     font-weight: 500;
     transition: color var(--transition);
     margin-top: 4px;
+    display: block;
+    padding: 6px 0;
   }
   .sf-link:hover { color: #014486; text-decoration: underline; }
+  .sf-link--small {
+    font-size: .78rem;
+    color: #0176d3;
+    text-align: center;
+    cursor: pointer;
+    margin-top: 2px;
+    display: block;
+    padding: 4px 0;
+  }
+  .sf-link--small:hover { text-decoration: underline; }
 
-  /* Radio list */
-  .sf-radio-list {
+  /* ── Method cards (State 2) ── */
+  .sf-method-list {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 10px;
+    margin-bottom: 0;
   }
-  .sf-radio-item {
+  .sf-method-card {
+    width: 100%;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 16px;
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 10px 6px;
-    border-radius: 8px;
+    align-items: center;
+    gap: 14px;
     cursor: pointer;
-    transition: background var(--transition);
+    transition: border-color var(--transition), box-shadow var(--transition);
+    position: relative;
+    text-align: left;
+    outline: none;
   }
-  .sf-radio-item:hover { background: #f0f5ff; }
-  .sf-radio-item input[type="radio"] {
-    width: 18px; height: 18px;
-    accent-color: #3d5afe;
-    margin-top: 2px;
+  .sf-method-card:hover {
+    border-color: #0176d3;
+    box-shadow: 0 0 0 3px rgba(1,118,211,.12);
+  }
+  .sf-method-card.selected {
+    border-color: #0176d3;
+    box-shadow: 0 0 0 3px rgba(1,118,211,.18);
+  }
+  .sf-method-card--recommended {
+    border-color: #0176d3;
+  }
+  .sf-method-card__badge {
+    position: absolute;
+    top: -11px;
+    right: 14px;
+    background: #0176d3;
+    color: #fff;
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 4px;
+  }
+  .sf-method-card__icon {
+    width: 40px; height: 40px;
     flex-shrink: 0;
-    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    background: #f0f5ff;
+    border-radius: 10px;
   }
-  .sf-radio-item__label {
-    font-size: .86rem;
-    color: #1a2740;
-    line-height: 1.45;
-    font-weight: 500;
+  .sf-method-card__text strong {
+    display: block;
+    font-size: .88rem;
+    font-weight: 700;
+    color: #0176d3;
+    margin-bottom: 2px;
+  }
+  .sf-method-card__text span {
+    font-size: .78rem;
+    color: #5a6278;
+    line-height: 1.35;
+  }
+
+  /* SF Card (kept for dialogs) */
+  .sf-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 32px 28px 24px;
+    width: 100%;
+    box-shadow: 0 4px 24px rgba(0,0,0,.14);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
   }
 
   /* ── Browser Dialog Overlay ── */
@@ -912,65 +1001,167 @@
     <!-- ── SIMULATOR FRAME ── -->
     <div class="simulator-frame" id="simFrame">
 
-      <!-- Logo always visible -->
-      <div class="sf-logo-chip">
-        <div class="sf-logo-chip__ring">
-          <div class="sf-logo-chip__text">Demo<br>Org-1</div>
-        </div>
-      </div>
+      <!-- ── STATE 1: Create a Passkey (matches real SF UI) ── -->
+      <div id="state1" class="sf-page" style="display:flex;">
 
-      <!-- ── STATE 1: Register Passkey ── -->
-      <div id="state1" style="width:100%; display:flex; flex-direction:column; align-items:center; gap:0;">
-        <div class="sf-card">
-          <div class="sf-card__icon-wrap">
-            <!-- Fingerprint/touch icon -->
-            <svg class="sf-card__icon" viewBox="0 0 72 72" fill="none">
-              <path d="M36 14C25.5 14 17 22.5 17 33c0 6.5 3.4 12.8 9 16.5" stroke="#3d4f6e" stroke-width="3.5" stroke-linecap="round"/>
-              <path d="M36 14c10.5 0 19 8.5 19 19 0 8-4.7 15.3-12 18.7" stroke="#3d4f6e" stroke-width="3.5" stroke-linecap="round"/>
-              <path d="M36 24c-4.9 0-9 4.1-9 9 0 4 2.6 7.6 6.4 8.8" stroke="#3d4f6e" stroke-width="3" stroke-linecap="round"/>
-              <path d="M36 24c4.9 0 9 4.1 9 9 0 3.7-2.2 7-5.5 8.5" stroke="#3d4f6e" stroke-width="3" stroke-linecap="round"/>
-              <circle cx="36" cy="33" r="3" fill="#3d4f6e"/>
-              <!-- hand shape hint -->
-              <path d="M26 48c0 4 3 8 6 10l4 4" stroke="#3d4f6e" stroke-width="3" stroke-linecap="round"/>
-              <path d="M46 48c0 4-3 8-6 10" stroke="#3d4f6e" stroke-width="3" stroke-linecap="round"/>
-              <rect x="28" y="56" width="16" height="8" rx="4" fill="#3d4f6e"/>
+        <!-- Salesforce cloud logo -->
+        <div class="sf-page__cloud">
+          <svg width="90" height="62" viewBox="0 0 180 124" fill="none">
+            <path d="M75 98c-14.3 0-26-11.7-26-26 0-1 .1-2 .2-3C40.5 65.5 34 57.5 34 48c0-12.2 9.8-22 22-22 3.2 0 6.2.7 9 1.9C68.2 20.8 77.5 16 88 16c15.4 0 28 12 29 27.1 1-.1 2-.1 3-.1 14.3 0 26 11.7 26 26S134.3 95 120 95c-1 0-2 0-3-.1-.5 1.7-1.2 3.3-2.1 4.8L75 98z" fill="#1589EE"/>
+            <text x="90" y="76" text-anchor="middle" font-family="'Segoe UI',sans-serif" font-size="26" font-style="italic" font-weight="700" fill="white">salesforce</text>
+          </svg>
+        </div>
+
+        <div class="sf-page__title">Create a Passkey</div>
+
+        <!-- Icon grid matching screenshot -->
+        <div class="sf-icon-grid">
+          <!-- Row 1 -->
+          <div class="sf-icon-grid__cell">
+            <!-- touch/finger -->
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"><path d="M9 11V6a3 3 0 016 0v5M9 11a3 3 0 006 0M7 11v4a5 5 0 0010 0v-4"/></svg>
+          </div>
+          <div class="sf-icon-grid__cell--empty"></div>
+          <div class="sf-icon-grid__cell">
+            <!-- ID card -->
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M13 10h4M13 13h3"/></svg>
+          </div>
+          <!-- Row 2 -->
+          <div class="sf-icon-grid__cell">
+            <!-- smiley face -->
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14s1 2 3.5 2 3.5-2 3.5-2"/><circle cx="9" cy="10" r=".8" fill="#94a3b8"/><circle cx="15" cy="10" r=".8" fill="#94a3b8"/></svg>
+          </div>
+          <!-- Center: person + key -->
+          <div class="sf-icon-grid__cell--center" style="display:flex; align-items:center; justify-content:center;">
+            <svg width="70" height="70" viewBox="0 0 70 70" fill="none">
+              <rect width="70" height="70" rx="14" fill="#fff"/>
+              <!-- person body -->
+              <ellipse cx="28" cy="26" rx="10" ry="11" fill="#1a2740"/>
+              <path d="M8 56c0-11 9-18 20-18h1c11 0 20 7 20 18" fill="#1a2740"/>
+              <!-- gold key -->
+              <circle cx="47" cy="46" r="9" fill="#b8860b"/>
+              <circle cx="47" cy="46" r="5.5" fill="#f4c430"/>
+              <circle cx="47" cy="46" r="2.5" fill="#b8860b"/>
+              <rect x="54" y="44.5" width="11" height="3" rx="1.5" fill="#f4c430"/>
+              <rect x="61.5" y="44.5" width="3.5" height="6" rx="1.5" fill="#f4c430"/>
             </svg>
           </div>
-          <div class="sf-card__body">
-            For fast, phishing-resistant login, set up a passkey. Use passkeys to log in with methods such as Touch ID, Face ID, or security keys.<br><br>
-            <strong>Click Register, then use your built-in authenticator.</strong>
+          <div class="sf-icon-grid__cell">
+            <!-- grid/dots -->
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="6" cy="6" r="2" fill="#94a3b8"/><circle cx="12" cy="6" r="2" fill="#94a3b8"/><circle cx="18" cy="6" r="2" fill="#94a3b8"/><circle cx="6" cy="12" r="2" fill="#94a3b8"/><circle cx="12" cy="12" r="2" fill="#94a3b8"/><circle cx="18" cy="12" r="2" fill="#94a3b8"/><circle cx="6" cy="18" r="2" fill="#94a3b8"/><circle cx="12" cy="18" r="2" fill="#94a3b8"/><circle cx="18" cy="18" r="2" fill="#94a3b8"/></svg>
           </div>
-          <div class="sf-card__actions">
-            <button class="sf-btn sf-btn--gray" disabled>Back</button>
-            <button class="sf-btn sf-btn--blue" onclick="goToState(3)">Register Passkey</button>
+          <!-- Row 3 -->
+          <div class="sf-icon-grid__cell">
+            <!-- card/badge -->
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3l-4 4-4-4"/></svg>
           </div>
-          <a class="sf-link" onclick="goToState(2)">Choose Another Verification Method</a>
+          <div class="sf-icon-grid__cell--empty"></div>
+          <div class="sf-icon-grid__cell">
+            <!-- asterisk/star -->
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/></svg>
+          </div>
         </div>
+
+        <!-- Info banner (shown on "required" variant) -->
+        <div class="sf-info-banner" id="s1InfoBanner" style="display:none;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a3a6e" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          Your account requires a passkey for enhanced security.
+        </div>
+
+        <p class="sf-page__subtitle">Passkeys ensure only you, on your own devices, can sign in to your account, no passwords needed. They're the most secure, easiest, and fastest way to log in to Salesforce.</p>
+
+        <!-- Feature bullets -->
+        <div class="sf-features">
+          <div class="sf-feature">
+            <div class="sf-feature__icon">
+              <!-- shield -->
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 5v6c0 5.2 3.4 10 8 11.9C17.6 21 21 16.2 21 11V5L12 2z" fill="#1a2740"/></svg>
+            </div>
+            <div class="sf-feature__text">
+              <strong>Enhanced Security</strong>
+              <span>Stronger protection than passwords.</span>
+            </div>
+          </div>
+          <div class="sf-feature">
+            <div class="sf-feature__icon">
+              <!-- bolt -->
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" fill="#1a2740"/></svg>
+            </div>
+            <div class="sf-feature__text">
+              <strong>Fast and Easy</strong>
+              <span>Log in quickly on your devices.</span>
+            </div>
+          </div>
+          <div class="sf-feature">
+            <div class="sf-feature__icon">
+              <!-- sparkle/stars -->
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a2740" stroke-width="1.8" stroke-linecap="round"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16z"/></svg>
+            </div>
+            <div class="sf-feature__text">
+              <strong>Seamless Experience</strong>
+              <span>Log in with Face ID or Touch ID, Windows Hello, password managers, or security keys.</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="sf-btn sf-btn--blue" onclick="goToState(3)" style="margin-bottom:12px;">
+          <!-- person+key icon -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="4" fill="#fff" opacity=".85"/><path d="M2 20c0-4 3.1-7 7-7h1" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><circle cx="18" cy="17" r="4" stroke="#fff" stroke-width="1.8"/><path d="M21 14l2-2" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Create Passkey
+        </button>
+        <a class="sf-link" onclick="goToState(2)">Choose Another Verification Method</a>
+        <a class="sf-link--small" onclick="goToState(1)">Start Over</a>
       </div>
 
-      <!-- ── STATE 2: Choose Method ── -->
-      <div id="state2" style="width:100%; display:none;">
-        <div class="sf-card">
-          <div class="sf-card__body">
-            <strong style="display:block; margin-bottom:8px; font-size:.92rem; color:#1a2740;">To keep your account secure, Salesforce requires extra verification. Set up multi-factor authentication (MFA) to finish logging in.</strong>
-          </div>
-          <div class="sf-radio-list">
-            <label class="sf-radio-item">
-              <input type="radio" name="mfaMethod" value="builtin">
-              <span class="sf-radio-item__label">Use a built-in authenticator on your device</span>
-            </label>
-            <label class="sf-radio-item">
-              <input type="radio" name="mfaMethod" value="sfapp">
-              <span class="sf-radio-item__label">Use the Salesforce Authenticator mobile app</span>
-            </label>
-            <label class="sf-radio-item">
-              <input type="radio" name="mfaMethod" value="totp">
-              <span class="sf-radio-item__label">Use verification codes from an authenticator app (such as Google Authenticator or Authy)</span>
-            </label>
-          </div>
-          <div class="sf-card__actions">
-            <button class="sf-btn sf-btn--blue" style="flex:1;" onclick="goToState(1)">Continue</button>
-          </div>
+      <!-- ── STATE 2: Choose a Verification Method ── -->
+      <div id="state2" class="sf-page" style="display:none;">
+
+        <div class="sf-page__cloud">
+          <svg width="90" height="62" viewBox="0 0 180 124" fill="none">
+            <path d="M75 98c-14.3 0-26-11.7-26-26 0-1 .1-2 .2-3C40.5 65.5 34 57.5 34 48c0-12.2 9.8-22 22-22 3.2 0 6.2.7 9 1.9C68.2 20.8 77.5 16 88 16c15.4 0 28 12 29 27.1 1-.1 2-.1 3-.1 14.3 0 26 11.7 26 26S134.3 95 120 95c-1 0-2 0-3-.1-.5 1.7-1.2 3.3-2.1 4.8L75 98z" fill="#1589EE"/>
+            <text x="90" y="76" text-anchor="middle" font-family="'Segoe UI',sans-serif" font-size="26" font-style="italic" font-weight="700" fill="white">salesforce</text>
+          </svg>
+        </div>
+
+        <div class="sf-page__title">Choose a Verification Method</div>
+
+        <p class="sf-page__subtitle">To keep your account secure, Salesforce requires extra verification. Set up multi-factor authentication (MFA) to finish logging in.</p>
+
+        <div class="sf-method-list">
+          <!-- Option 1: Passkey (RECOMMENDED) -->
+          <button class="sf-method-card sf-method-card--recommended selected" onclick="selectMethod(this, 3)">
+            <span class="sf-method-card__badge">Recommended</span>
+            <div class="sf-method-card__icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="7" r="4" fill="#0176d3"/><path d="M2 19c0-3.9 3.1-7 7-7h1" stroke="#0176d3" stroke-width="1.8" stroke-linecap="round"/><circle cx="18" cy="16" r="3.5" stroke="#0176d3" stroke-width="1.8"/><path d="M20.5 13.5l1.5-1.5" stroke="#0176d3" stroke-width="1.8" stroke-linecap="round"/><rect x="20.8" y="16" width="2.5" height="1.5" rx=".75" fill="#0176d3"/></svg>
+            </div>
+            <div class="sf-method-card__text">
+              <strong>Passkey</strong>
+              <span>Use a built-in authenticator on your device</span>
+            </div>
+          </button>
+
+          <!-- Option 2: Salesforce Authenticator -->
+          <button class="sf-method-card" onclick="selectMethod(this, null)">
+            <div class="sf-method-card__icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="5" y="2" width="14" height="20" rx="3" stroke="#0176d3" stroke-width="1.8"/><path d="M9 7h6M9 11h6M9 15h4" stroke="#0176d3" stroke-width="1.6" stroke-linecap="round"/><path d="M15 14l2 2 3-3" stroke="#0176d3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sf-method-card__text">
+              <strong>Salesforce Authenticator</strong>
+              <span>Use the Salesforce Authenticator mobile app</span>
+            </div>
+          </button>
+
+          <!-- Option 3: OTP App -->
+          <button class="sf-method-card" onclick="selectMethod(this, null)">
+            <div class="sf-method-card__icon">
+              <!-- hash / OTP -->
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0176d3" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+            </div>
+            <div class="sf-method-card__text">
+              <strong>One-Time Password App</strong>
+              <span>Use verification codes from an authenticator app (such as Google Authenticator or Authy)</span>
+            </div>
+          </button>
         </div>
       </div>
 
@@ -1470,7 +1661,7 @@ After selecting Chrome profile, follow the on-screen prompt to verify your ident
     if (n === 1) {
       document.getElementById('state1').style.display = 'flex';
     } else if (n === 2) {
-      document.getElementById('state2').style.display = 'block';
+      document.getElementById('state2').style.display = 'flex';
     } else if (n === 3) {
       document.getElementById('dialogOverlay').style.display = 'flex';
       document.getElementById('bd3').style.display = 'flex';
@@ -1535,6 +1726,16 @@ After selecting Chrome profile, follow the on-screen prompt to verify your ident
     t.textContent = msg;
     document.body.appendChild(t);
     setTimeout(() => t.remove(), 3000);
+  }
+
+  function selectMethod(card, nextState) {
+    document.querySelectorAll('.sf-method-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    if (nextState) {
+      setTimeout(() => goToState(nextState), 280);
+    } else {
+      showToast('This method is available in the full Salesforce flow. For this simulation, select "Passkey" to continue.');
+    }
   }
 
   function selectStorage(type) {
